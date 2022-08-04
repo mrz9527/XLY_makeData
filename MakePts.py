@@ -51,51 +51,51 @@ def calc_l67_pts(Index, X, Y):
 # l56_pts: [st5, et5) + [et5, t6)
 def calc_l56_pts(Index, X, Y, Xt, k56, interval):
     # 分为两部分，第一部分需要推断并插入部分数据，第二部分，是实际的数据
-    l56_pts = []
+    l_5_to_5half_pts = []
 
-    # 插入数据 (st5, et5]
+    # 插入数据 (st5, t5half]
     sxt5 = Xt[5]
 
-    ext5 = X[Index[5]]
-    eyt5 = Y[Index[5]]
+    xt5half = X[Index[5]]
+    yt5half = Y[Index[5]]
 
     i = 0
     while True:
-        xt = ext5 - i * interval
+        xt = xt5half - i * interval
         if xt >= sxt5:
-            yt = eyt5 + k56 * (xt - ext5)
+            yt = yt5half + k56 * (xt - xt5half)
             pt = [xt, yt]
-            l56_pts.append(pt)
+            l_5_to_5half_pts.append(pt)
             i += 1
         else:
             break
 
-    l56_pts.reverse()
+    l_5_to_5half_pts.reverse()
 
-    # 实际数据 (et5, t6)
+    # 实际数据 (t5half, t6)
+    l_5half_to_6_pts = []
     for i in range(Index[5] + 1, Index[6]):
         pt = [X[i], Y[i]]
-        l56_pts.append(pt)
+        l_5half_to_6_pts.append(pt)
 
-    return l56_pts
+    # 两段线之间做光滑处理（通过贝塞尔方式）
+    l_5_to_5half_pts, l_5half_to_6_pts, l56_bezier_ctl_pts = ParamCalculate.SplitTwoCurve(l_5_to_5half_pts,
+                                                                                          l_5half_to_6_pts)
+    l56_bezier_pts = BazelCurve.InsertPtByInterval(l56_bezier_ctl_pts, interval)
+
+    return l_5_to_5half_pts, l_5half_to_6_pts, l56_bezier_pts
 
 
 # l35_pts: [t3, t5)
-def calc_l35_pts(Xt, Yt, k23, scale):
+def calc_l35_pts(pt3, pt5, k23, interval):
     # 计算bezier控制点信息
-    pt3 = [Xt[3], Yt[3]]
-    pt5 = [Xt[5], Yt[5]]
     ctl_pt3, ctl_pt5 = ParamCalculate.CalcTwoControlPtByParallelLine(pt3, pt5, k23)
 
     # 打印bezier控制点信息
     bezier_ctl_pts = [pt3, ctl_pt3, ctl_pt5, pt5]
     BazelCurve.PrintOut_Bezier(bezier_ctl_pts)
 
-    # 计算bezier的参数序列T
-    T = BazelCurve.GetBezierParamT(scale)
-
-    # 计算bazel曲线的插入点
-    bezier_insert_pts = BazelCurve.InsertPt(bezier_ctl_pts, T)
+    bezier_insert_pts = BazelCurve.InsertPtByInterval(bezier_ctl_pts, interval)
 
     # 打印bezier曲线的插入点
     BazelCurve.PrintOut_InsertPt(bezier_insert_pts)
@@ -105,13 +105,32 @@ def calc_l35_pts(Xt, Yt, k23, scale):
     return l35_pts
 
 
+def calc_l35_pts_ex(ctl_pt3, pt3, l_5_to_5half_pts, k23, interval):
+    scale5 = ParamCalculate.SplitScale(len(l_5_to_5half_pts), 10)
+    index5 = int(scale5 * len(l_5_to_5half_pts))
+
+    ctl_pt5 = l_5_to_5half_pts[0]
+    pt5 = l_5_to_5half_pts[index5]
+
+    bezier_ctl_pts = [ctl_pt3, pt3, ctl_pt5, pt5]
+
+    # 计算bazel曲线的插入点
+    l35_pts = BazelCurve.InsertPtByInterval(bezier_ctl_pts, interval)
+    l_5_to_5half_pts = l_5_to_5half_pts[index5:-1]
+
+    # 打印bezier曲线的插入点
+    BazelCurve.PrintOut_InsertPt(l35_pts)
+
+    return l35_pts, l_5_to_5half_pts
+
+
 # l23_pts:(t2, t3)
-def calc_l23_pts(Xt, Yt, k23, interval):
+def calc_l23_pts(Xt, Yt, ctl_pt3, k23, interval):
     l23_pts = []
 
     xt2 = Xt[2]
-    xt3 = Xt[3]
-    yt3 = Yt[3]
+    xt3 = ctl_pt3[0]
+    yt3 = ctl_pt3[1]
 
     i = 1  # (t2, t3)，不包括t3，所以i从1开始
     while True:

@@ -18,11 +18,19 @@ def PrintOut_Bezier(bezier_pts):
         print(f"{pt_index} ({bezier_pts[pt_index][0]},{bezier_pts[pt_index][1]})")
 
 
-def InsertPt(bezier_ctl_pts, T):
+def InsertPtByT(bezier_ctl_pts, T):
     bezier_insert_pts = []
     for t in T:
         Bezier(bezier_ctl_pts, len(bezier_ctl_pts), t)
         bezier_insert_pts.append(bezier_ctl_pts[0].copy())
+    return bezier_insert_pts
+
+
+def InsertPtByInterval(bezier_ctl_pts, interval):
+    scale = interval / (bezier_ctl_pts[-1][0] - bezier_ctl_pts[0][0]) / 2
+    T = GetBezierParamT(scale)
+
+    bezier_insert_pts = InsertPtByT(bezier_ctl_pts, T)
     return bezier_insert_pts
 
 
