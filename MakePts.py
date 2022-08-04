@@ -143,6 +143,7 @@ def calc_l23_pts(Xt, Yt, ctl_pt3, k23, interval):
         else:
             break
 
+    l23_pts.reverse()
     return l23_pts
 
     # yt2 = yt
@@ -171,3 +172,56 @@ def calc_l12_pts(Xt, Yt, X, Y, Index):
         l12_pts[i][1] = yt
 
     return l12_pts
+
+
+# l1_1half_pts, l1half_2_pts = MakePts.calc_l12_pts_ex(Xt, Yt, X, Y, Index, k23, l12_ctl_pt)
+# l12_ctl_pt3 = l23[0]
+def calc_l12_pts_ex(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, interval):
+    l12_pts = []
+    # 先做偏置，让X[0]=27从-50开始
+    off = X[0] - Xt[1]
+    for i in range(Index[1], Index[2] + 1):  # [t1, t2]闭区间，所以Index[2] + 1
+        xt = X[i] - off
+        yt = Y[i]
+        pt = [xt, yt]
+        l12_pts.append(pt)
+
+    # 寻找索引
+    pos = -1
+    l12_ctl_pt1 = None
+    # 更新y值
+    ydt2 = l12_pts[Index[2]][1] - Yt[2]
+    xdt2 = l12_pts[Index[2]][0] - l12_pts[Index[1]][0]
+    for i in range(Index[1], Index[2] + 1):
+        xt = l12_pts[i][0]
+        xdt = xt - l12_pts[0][0]
+        ydt = xdt / xdt2 * ydt2
+        yt = l12_pts[i][1] - ydt
+
+        tmp_yt = l12_ctl_pt3[1] + k23 * (xt - l12_ctl_pt3[0])
+        if yt > tmp_yt:
+            pos = i
+            l12_ctl_pt1 = [xt, tmp_yt]
+            break
+        else:
+            l12_pts[i][1] = yt
+
+    l1_1half_pts = l12_pts[0:pos]
+
+    l12_ctl_pt2x = l12_ctl_pt1[0] + 3 / 4 * (l12_ctl_pt3[0] - l12_ctl_pt1[0])
+    l12_ctl_pt2y = l12_ctl_pt1[1] + 3 / 4 * (l12_ctl_pt3[1] - l12_ctl_pt1[1])
+    l12_ctl_pt2 = [l12_ctl_pt2x, l12_ctl_pt2y]
+
+    tmpx = l12_ctl_pt1[0] + 1 / 4 * (l12_ctl_pt3[0] - l12_ctl_pt1[0])
+    tmpy = l12_ctl_pt1[1] + 1 / 8 * (l12_ctl_pt3[1] - l12_ctl_pt1[1])
+
+    tmp = [tmpx, tmpy]
+
+    l12_ctl_pts = l1_1half_pts[-3:-1]
+    l12_ctl_pts.extend([l12_ctl_pt1, tmp, l12_ctl_pt2, l12_ctl_pt3])
+
+    l1_1half_pts = l1_1half_pts[0:-3]
+
+    l12_bezier_pts = BazelCurve.InsertPtByInterval(l12_ctl_pts, interval)
+
+    return l1_1half_pts, l12_bezier_pts
