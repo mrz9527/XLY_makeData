@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import xlrd
 
+
 def PrintXY(X, Y):
     for index in range(len(X)):
         print(f" {index}. ({X[index]}, {Y[index]})")
@@ -37,6 +38,24 @@ def ReadXY(sheet: xlrd.sheet.Sheet, labelCell: list, Xcell, Ycell, rowCount):
     for rowIndex in range(sRow, rowCount):
         x = sheet.cell_value(rowIndex, xCol)
         y = sheet.cell_value(rowIndex, yCol)
+        if type(x) == str:
+            if x == "":
+                continue
+            else:
+                x = float(x)
+        if type(y) == str:
+            if y == "":
+                continue
+            else:
+                y = float(y)
         X.append(x)
         Y.append(y)
     return label, X, Y
+
+
+def GetColNumberByColName(colName):
+    colNumber = 0
+    for i, j in enumerate(colName[::-1]):
+        colNumber += (ord(j) - ord('A') + 1) * 26 ** i
+
+    return colNumber
