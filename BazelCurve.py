@@ -27,6 +27,9 @@ def InsertPtByT(bezier_ctl_pts, T):
 
 
 def InsertPtByInterval(bezier_ctl_pts, interval):
+    if len(bezier_ctl_pts) == 0:
+        return []
+
     scale = interval / (bezier_ctl_pts[-1][0] - bezier_ctl_pts[0][0]) / 2
     T = GetBezierParamT(scale)
 

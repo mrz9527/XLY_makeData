@@ -217,11 +217,16 @@ def SplitScale(count, base):
 
 
 def SplitTwoCurve(l1_pts, l2_pts, base_count=10):
+    if len(l1_pts) == 0:
+        return [], l2_pts, []
+    if len(l2_pts) == 0:
+        return l1_pts, [], []
+
     scale1 = SplitScale(len(l1_pts), base_count)
     scale2 = SplitScale(len(l2_pts), base_count)
 
-    index1 = len(l1_pts) * scale1
-    index2 = len(l2_pts) * (1 - scale2)
+    index1 = len(l1_pts) * (1-scale1)
+    index2 = len(l2_pts) * scale2
 
     index1 = int(index1)
     index2 = int(index2)
