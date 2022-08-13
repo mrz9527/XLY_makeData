@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
 
-
-def Bezier(pts, count, t):
+def Bezier(control_pts, count, t):
+    """
+    首次调用时，count = len(control_pts)，每次迭代时，相当于控制点减1
+    :param control_pts:
+    :param count:
+    :param t:
+    :return:
+    """
     if count <= 1:
         return
 
     for pos in range(count - 1):
-        pts[pos][0] = (1 - t) * pts[pos][0] + t * pts[pos + 1][0]
-        pts[pos][1] = (1 - t) * pts[pos][1] + t * pts[pos + 1][1]
+        control_pts[pos][0] = (1 - t) * control_pts[pos][0] + t * control_pts[pos + 1][0]
+        control_pts[pos][1] = (1 - t) * control_pts[pos][1] + t * control_pts[pos + 1][1]
 
-    Bezier(pts, count - 1, t)
+    Bezier(control_pts, count - 1, t)
 
 
 def PrintOut_Bezier(bezier_pts):
@@ -27,6 +33,9 @@ def InsertPtByT(bezier_ctl_pts, T):
 
 
 def InsertPtByInterval(bezier_ctl_pts, interval):
+    if len(bezier_ctl_pts) == 0:
+        return []
+
     scale = interval / (bezier_ctl_pts[-1][0] - bezier_ctl_pts[0][0]) / 2
     T = GetBezierParamT(scale)
 

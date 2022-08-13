@@ -93,12 +93,12 @@ def calc_l35_pts(pt3, pt5, k23, interval):
 
     # 打印bezier控制点信息
     bezier_ctl_pts = [pt3, ctl_pt3, ctl_pt5, pt5]
-    BazelCurve.PrintOut_Bezier(bezier_ctl_pts)
+    # BazelCurve.PrintOut_Bezier(bezier_ctl_pts)
 
     bezier_insert_pts = BazelCurve.InsertPtByInterval(bezier_ctl_pts, interval)
 
     # 打印bezier曲线的插入点
-    BazelCurve.PrintOut_InsertPt(bezier_insert_pts)
+    # BazelCurve.PrintOut_InsertPt(bezier_insert_pts)
 
     l35_pts = bezier_insert_pts
 
@@ -195,7 +195,10 @@ def calc_l12_pts_ex(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, interval):
     for i in range(Index[1], Index[2] + 1):
         xt = l12_pts[i][0]
         xdt = xt - l12_pts[0][0]
-        ydt = xdt / xdt2 * ydt2
+        if xdt == 0.0:
+            ydt = ydt2/(Index[2] - Index[1]) * (i - Index[1])
+        else:
+            ydt = xdt / xdt2 * ydt2
         yt = l12_pts[i][1] - ydt
 
         tmp_yt = l12_ctl_pt3[1] + k23 * (xt - l12_ctl_pt3[0])

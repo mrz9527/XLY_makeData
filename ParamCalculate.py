@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import math
+import matplotlib.pyplot as plt
 
 
 # 先不设置xt2，在CalculateKeyPt中来计算Xt2和xdt12
@@ -139,6 +140,18 @@ def CalculateKeyPt(X: list, Y: list, Xt: list, m35, m56):
     else:
         print(f"找到{maxtimes}次较大误差（大于5度)")
 
+    # plt.vlines(tmpx2, ymin=0, ymax=50, label="xxxxx", color="#777777")
+
+    if (tmpx2 - X[0]) >= (Xt[3] - Xt[1]):
+        print("(tmpx2 - X[0]) >= (Xt[3] - Xt[1])，进行修正")
+        tmpx2 = (Xt[3] - Xt[1])/2 + X[0]
+        for curIndex in range(lastIndex, -1, -1):
+            if X[curIndex] < tmpx2:
+                tmpIndex2 = curIndex
+                tmpx2 = X[curIndex]
+                break
+
+
     tmpy2 = Y[tmpIndex2]
     xdt12 = tmpx2 - X[0]
     Xt[2] = Xt[1] + xdt12
@@ -217,11 +230,16 @@ def SplitScale(count, base):
 
 
 def SplitTwoCurve(l1_pts, l2_pts, base_count=10):
+    if len(l1_pts) == 0:
+        return [], l2_pts, []
+    if len(l2_pts) == 0:
+        return l1_pts, [], []
+
     scale1 = SplitScale(len(l1_pts), base_count)
     scale2 = SplitScale(len(l2_pts), base_count)
 
-    index1 = len(l1_pts) * scale1
-    index2 = len(l2_pts) * (1 - scale2)
+    index1 = len(l1_pts) * (1 - scale1)
+    index2 = len(l2_pts) * scale2
 
     index1 = int(index1)
     index2 = int(index2)
