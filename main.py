@@ -43,6 +43,8 @@ def get_excel_config():
 
 
 def get_curve_param_config():  # 预配置数据信息
+    # 10, 21, 22, 23, 24
+
     Xt4 = [-8.6, -32.3, -15.6, -15.4, -6.3]
     Xt7 = [48, 48, 48, 48, 48]
 
@@ -50,7 +52,7 @@ def get_curve_param_config():  # 预配置数据信息
     Xdt45 = [7.0, 7.0, 7.0, 7.0, 7.0]
     Xdt7 = [0.5, 0.5, 0.5, 0.5, 0.5]
     Xt1 = [-50.0, -50.0, -50.0, -50.0, -50.0]
-    M35 = [2, 2, 2, 2, 2]
+    M35 = [4, 4, 4, 4, 4]
     M56 = [0.4, 0.2, 0.2, 0.2, 0.2]
 
     curve_params = []
@@ -236,6 +238,7 @@ def save_data(filepath, label_cell_coords, label_names, startx_cell_coords, star
 
 
 def plot_curves(curves, colors, label_names):
+
     # 绘制5条曲线
     curve_count = len(curves)
     for i in range(curve_count):
