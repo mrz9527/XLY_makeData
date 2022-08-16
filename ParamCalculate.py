@@ -4,22 +4,6 @@ import math
 import matplotlib.pyplot as plt
 
 
-# 先不设置xt2，在CalculateKeyPt中来计算Xt2和xdt12
-def SetConfig(xdt34=4.0, xdt45=4.0, xt7=47.0, xdt7=3.0, xt1=-50.0, xt4=-6.3, m35=2, m56=0.5):
-    xt6 = xt7 - xdt7
-
-    xt3 = xt4 - xdt34
-    xt5 = xt4 + xdt45
-
-    if xt5 >= xt6:
-        xdt45 = 1 / 3 * (xt6 - xt4)
-        xt5 = xt4 + xdt45
-
-    Xt = [0, xt1, 0, xt3, xt4, xt5, xt6, xt7]
-
-    return Xt, m35, m56
-
-
 """
 直线l1和l2平行，l1上一点pt1和l2上一点pt2之间构造2个控制点ctl_pt1和ctl_pt2
 (pt1，ctl_pt1, ctl_pt2, pt2)，共四个点，构造贝塞尔曲线
