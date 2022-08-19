@@ -25,3 +25,27 @@ class MathUtils():
             res.append(0)
 
         return res
+
+    @staticmethod
+    def get_ctl_pts_by_By_parallel_line(pt1: list, pt2: list, k):
+        """
+        给定两条平行线上两点，计算两个控制点
+        :param pt1: 平行线上点
+        :param pt2: 另一条平行线上点
+        :param k: 平行线的斜率
+        :return: 返回两个控制点
+        """
+        mid_ptx = (pt1[0] + pt2[0]) / 2
+        mid_pty = (pt1[1] + pt2[1]) / 2
+
+        ctl_pt1x = (mid_pty - pt1[1] + mid_ptx / k + k * pt1[0]) * k / (k ** 2 + 1)
+        ctl_pt1y = pt1[1] + k * (ctl_pt1x - pt1[0])
+
+        ctl_pt1 = [ctl_pt1x, ctl_pt1y]
+
+        ctl_pt2x = (mid_pty - pt2[1] + mid_ptx / k + k * pt2[0]) * k / (k ** 2 + 1)
+        ctl_pt2y = pt2[1] + k * (ctl_pt2x - pt2[0])
+
+        ctl_pt2 = [ctl_pt2x, ctl_pt2y]
+
+        return ctl_pt1, ctl_pt2

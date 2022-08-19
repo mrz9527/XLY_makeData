@@ -1,11 +1,8 @@
 import PlotCurve
-from excelhandler.ReadExcel import ReadExcel
-from excelhandler.WriteExcel import WriteExcel
-import ParamCalculate
-
+from excelhandler.readexcel import ReadExcel
+from excelhandler.writeexcel import WriteExcel
+import common
 import MakePts
-
-import matplotlib.pyplot as plt
 
 
 def get_excel_config():
@@ -91,15 +88,13 @@ def curve_process(X, Y, curve_param, Xt):
     xt4, xt7, xdt34, xdt45, xdt7, xt1, m35, m56, xt6, xt3, xt5 = curve_param
 
     # 计算关键点坐标信息
-    Index, Xt, Yt, k23, k56, xdt12 = ParamCalculate.CalculateKeyPt(X, Y, Xt, m35, m56)
+    Index, Xt, Yt, k23, k56, xdt12 = MakePts.calc_import_pts(X, Y, Xt, m35, m56)
 
     # 打印关键点坐标信息
     # ParamCalculate.PrintOut_CalculateKeyPt(Index, Xt, Yt, k23, k56)
 
     # 计算横坐标间距和基准百分比
-    intervalx = ParamCalculate.GetInterval(Xt[7], Xt[6], Index[7], Index[6])
-    # 打印横坐标间距和基准百分比
-    # ParamCalculate.PrintOut_GetInterval(intervalx)
+    intervalx = common.GetInterval(Xt[7], Xt[6], Index[7], Index[6])
 
     # 计算l67
     l67_pts = MakePts.calc_l67_pts(Index, X, Y)
@@ -119,7 +114,7 @@ def curve_process(X, Y, curve_param, Xt):
 
     # 计算l12曲线上的数据
     l12_ctl_pt3 = l23_pts[0]
-    l1_1half_pts, l12_bezier_pts = MakePts.calc_l12_pts_ex(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, intervalx)
+    l1_1half_pts, l12_bezier_pts = MakePts.calc_l12_pts(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, intervalx)
 
     # 所有曲线
     l_pts = []
@@ -246,14 +241,15 @@ def plot_curves(curves, colors, label_names):
         PlotCurve.DrawCurve(curve, color)
 
     # 设置图例
-    plt.legend(label_names)
+    PlotCurve.legend(label_names)
+
     # 显示曲线
     PlotCurve.Show()
 
 
 def main_process():
     # 设置excel文件
-    filepath = "data.xlsx"
+    filepath = "1_heating_curve_task.xlsx"
 
     # 获取excel基本配置信息
     label_cell_coords, startx_cell_coords, starty_cell_coords = get_excel_config()
@@ -287,4 +283,5 @@ def main_process():
 
 
 if __name__ == '__main__':
+    print("1_heating_curve_task")
     main_process()

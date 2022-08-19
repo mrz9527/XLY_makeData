@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-import matplotlib.pyplot as plt
+
+from pltplot.pltplot import PltPlot
 
 
 def DrawCurve(pts, color):
@@ -11,20 +12,16 @@ def DrawCurve(pts, color):
         ptxs.append(pt[0])
         ptys.append(pt[1])
 
-    plt.plot(ptxs, ptys, color=color)
-    # plt.show()
+    PltPlot.plt_plot(ptxs, ptys, color=color)
 
 
 def DrawVlines(Xt, yrange: list, Color, Label):
     for i in range(0, len(Color)):
-        plt.vlines(Xt[i], ymin=yrange[0], ymax=yrange[1], label=Label[i], color=Color[i])
+        PltPlot.plt_vline(Xt[i], ymin=yrange[0], ymax=yrange[1], label=Label[i], color=Color[i])
 
 
 def Show():
-    plt.show()
+    PltPlot.plt_show()
 
-
-def DrawMultiCurve(lines, colors):
-    n = len(lines)
-    for i in range(n):
-        DrawCurve(lines[i], colors[i])
+def legend(label_names):
+    PltPlot.plt_legend(label_names)
