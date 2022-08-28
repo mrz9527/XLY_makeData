@@ -2,7 +2,7 @@ import PlotCurve
 from excelhandler.readexcel import ReadExcel
 from excelhandler.writeexcel import WriteExcel
 import common
-import MakePts
+import heating_curve_calc
 
 
 def get_excel_config():
@@ -88,7 +88,7 @@ def curve_process(X, Y, curve_param, Xt):
     xt4, xt7, xdt34, xdt45, xdt7, xt1, m35, m56, xt6, xt3, xt5 = curve_param
 
     # 计算关键点坐标信息
-    Index, Xt, Yt, k23, k56, xdt12 = MakePts.calc_import_pts(X, Y, Xt, m35, m56)
+    Index, Xt, Yt, k23, k56, xdt12 = heating_curve_calc.calc_import_pts(X, Y, Xt, m35, m56)
 
     # 打印关键点坐标信息
     # ParamCalculate.PrintOut_CalculateKeyPt(Index, Xt, Yt, k23, k56)
@@ -97,24 +97,24 @@ def curve_process(X, Y, curve_param, Xt):
     intervalx = common.GetInterval(Xt[7], Xt[6], Index[7], Index[6])
 
     # 计算l67
-    l67_pts = MakePts.calc_l67_pts(Index, X, Y)
+    l67_pts = heating_curve_calc.calc_l67_pts(Index, X, Y)
 
     # 计算l56
     # 基于已有数据来造数据，已有数据曲线上，只有l12和l56(可能没有，或者只有一部分数据曲线）和l67
     # 所以基于已有数据,l12的t2的index2，和l56(部分曲线数据）的t5的index5相等
-    l_5_to_5half_pts, l_5half_to_6_pts, l56_bezier_pts = MakePts.calc_l56_pts(Index, X, Y, Xt, k56, intervalx)
+    l_5_to_5half_pts, l_5half_to_6_pts, l56_bezier_pts = heating_curve_calc.calc_l56_pts(Index, X, Y, Xt, k56, intervalx)
 
     # 计算l35贝塞尔曲线上的数据
     pt3 = [Xt[3], Yt[3]]
     pt5 = l_5_to_5half_pts[0]
-    l35_pts = MakePts.calc_l35_pts(pt3, pt5, k23, intervalx)
+    l35_pts = heating_curve_calc.calc_l35_pts(pt3, pt5, k23, intervalx)
 
     # 计算l23曲线上的数据
-    l23_pts = MakePts.calc_l23_pts(Xt, Yt, l35_pts[0], k23, intervalx)
+    l23_pts = heating_curve_calc.calc_l23_pts(Xt, Yt, l35_pts[0], k23, intervalx)
 
     # 计算l12曲线上的数据
     l12_ctl_pt3 = l23_pts[0]
-    l1_1half_pts, l12_bezier_pts = MakePts.calc_l12_pts(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, intervalx)
+    l1_1half_pts, l12_bezier_pts = heating_curve_calc.calc_l12_pts(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, intervalx)
 
     # 所有曲线
     l_pts = []

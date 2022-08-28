@@ -1,3 +1,5 @@
+import copy
+
 import PlotCurve
 from excelhandler.readexcel import ReadExcel
 from excelhandler.writeexcel import WriteExcel
@@ -42,42 +44,58 @@ def get_excel_config():
 
 def get_curve_param_config():  # 预配置数据信息
     # 10, 21, 22, 23, 24
-
-    Xt4 = [-8.6, -32.3, -15.6, -15.4, -6.3]
-    Xt7 = [48, 48, 48, 48, 48]
-
+    # 因为曲线的横坐标是从高到低画的，所以x的坐标递减
+    Xt0 = [29.0, 29.0, 29.0, 29.0, 29.0]
+    Xdt0 = [0.5, 0.5, 0.5, 0.5, 0.5]
+    Xt3 = [-8.6, -32.3, -15.6, -15.4, -6.3]
+    Xdt32 = [7.0, 7.0, 7.0, 7.0, 7.0]
     Xdt34 = [7.0, 7.0, 7.0, 7.0, 7.0]
-    Xdt45 = [7.0, 7.0, 7.0, 7.0, 7.0]
-    Xdt7 = [0.5, 0.5, 0.5, 0.5, 0.5]
-    Xt1 = [-50.0, -50.0, -50.0, -50.0, -50.0]
-    M35 = [8, 4, 8, 4, 8]
-    M56 = [0.4, 0.2, 0.2, 0.2, 0.2]
+    Xt5 = [-50.0, -50.0, -50.0, -50.0, -50.0]
+    M12 = [1.0, 1.0, 1.0, 1.0, 1.0]
+    M45 = copy.deepcopy(M12)
+    M24 = [8.0, 8.0, 8.0, 8.0, 8.0]
+
+    curve_num = len(Xt0)
+
+    Xt1 = [Xt0[i] - Xdt0[i] for i in range(curve_num)]
+    Xt2 = [Xt3[i] + Xdt32[i] for i in range(curve_num)]
+    Xt4 = [Xt3[i] - Xdt32[i] for i in range(curve_num)]
 
     curve_params = []
     Xts = []
-    count = len(Xt4)
-    for i in range(count):
-        xdt34 = Xdt34[i]
-        xdt45 = Xdt45[i]
-        xdt7 = Xdt7[i]
+
+    for i in range(curve_num):
+        xt0 = Xt0[i]
         xt1 = Xt1[i]
-        m35 = M35[i]
-        m56 = M56[i]
-
+        xt2 = Xt2[i]
+        xt3 = Xt3[i]
         xt4 = Xt4[i]
-        xt7 = Xt7[i]
+        xt5 = Xt5[i]
 
-        xt6 = xt7 - xdt7
+        xdt0 = Xdt0[i]
+        xdt32 = Xdt32[i]
+        xdt34 = Xdt34[i]
 
-        xt3 = xt4 - xdt34
-        xt5 = xt4 + xdt45
+        m12 = M12[i]
+        m45 = M45[i]
+        m24 = M24[i]
 
-        if xt5 >= xt6:
-            xdt45 = 1 / 3 * (xt6 - xt4)
-            xt5 = xt4 + xdt45
+        Xt1 = [Xt0[i] - Xdt0[i] for i in range(curve_num)]
+        Xt2 = [Xt3[i] + Xdt32[i] for i in range(curve_num)]
+        Xt4 = [Xt3[i] - Xdt32[i] for i in range(curve_num)]
 
-        curve_param = [xt4, xt7, xdt34, xdt45, xdt7, xt1, m35, m56, xt6, xt3, xt5]
-        Xt = [0, xt1, 0, xt3, xt4, xt5, xt6, xt7]
+        # 检测xt2是否合理
+        if xt2 >= xt1:
+            xdt32 = 1 / 3 * (xt1 - xt3)
+            xt2 = xt3 + xdt32
+
+        # 检测xt4是否合理
+        if xt4 <= xt5:
+            xdt34 = 1 / 3 * (xt3 - xt5)
+            xt4 = xt3 - xdt34
+
+        curve_param = [xdt0, xdt32, xdt34, m12, m24, m45]
+        Xt = [xt0, xt1, xt2, xt3, xt4, xt5]
 
         curve_params.append(curve_param)
         Xts.append(Xt)
@@ -86,7 +104,10 @@ def get_curve_param_config():  # 预配置数据信息
 
 
 def curve_process(X, Y, curve_param, Xt):
-    xt4, xt7, xdt34, xdt45, xdt7, xt1, m35, m56, xt6, xt3, xt5 = curve_param
+    xdt0, xdt32, xdt34, m12, m24, m45 = curve_param
+    xt0, xt1, xt2, xt3, xt4, xt5 = Xt
+
+    return
 
     # 计算关键点坐标信息
     Index, Xt, Yt, k23, k56, xdt12 = MakePts.calc_import_pts(X, Y, Xt, m35, m56)
@@ -264,12 +285,13 @@ def main_process():
     colors = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#777777"]
 
     plot_curves(curves, colors, label_names)
-    return
 
     # 获取曲线的参数配置
-    # curve_params, Xts = get_curve_param_config()
+    curve_params, Xts = get_curve_param_config()
 
     new_curves = []
+
+    return
 
     # 遍历并处理5条曲线
     curve_count = len(curves)
