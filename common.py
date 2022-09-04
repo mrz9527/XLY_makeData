@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 def GetInterval(ex, sx, eIndex, sIndex):
-    interval = (ex - sx) / (eIndex - sIndex)
+    interval = abs((ex - sx) / (eIndex - sIndex))
     return interval
 
 

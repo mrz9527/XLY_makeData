@@ -6,6 +6,7 @@ from excelhandler.writeexcel import WriteExcel
 import common
 from pltplot.pltplot import PltPlot
 import matplotlib.pyplot as plt
+import cooling_curve_calc
 
 
 def get_excel_config():
@@ -45,15 +46,16 @@ def get_excel_config():
 def get_curve_param_config():  # 预配置数据信息
     # 10, 21, 22, 23, 24
     # 因为曲线的横坐标是从高到低画的，所以x的坐标递减
-    Xt0 = [29.0, 29.0, 29.0, 29.0, 29.0]
-    Xdt0 = [0.5, 0.5, 0.5, 0.5, 0.5]
+    Xt0 = [31.0, 31.0, 31.0, 31.0, 31.0]
+    Xdt0 = [3.0, 3.0, 3.0, 3.0, 3.0]
     Xt3 = [-8.6, -32.3, -15.6, -15.4, -6.3]
     Xdt32 = [7.0, 7.0, 7.0, 7.0, 7.0]
     Xdt34 = [7.0, 7.0, 7.0, 7.0, 7.0]
     Xt5 = [-50.0, -50.0, -50.0, -50.0, -50.0]
     M12 = [1.0, 1.0, 1.0, 1.0, 1.0]
-    M45 = copy.deepcopy(M12)
-    M24 = [8.0, 8.0, 8.0, 8.0, 8.0]
+    # M45 = copy.deepcopy(M12)
+    M45 = [-i for i in M12]
+    M24 = [-80.0, 80.0, 80.0, -80.0, -50.0]
 
     curve_num = len(Xt0)
 
@@ -107,49 +109,32 @@ def curve_process(X, Y, curve_param, Xt):
     xdt0, xdt32, xdt34, m12, m24, m45 = curve_param
     xt0, xt1, xt2, xt3, xt4, xt5 = Xt
 
-    return
-
     # 计算关键点坐标信息
-    Index, Xt, Yt, k23, k56, xdt12 = MakePts.calc_import_pts(X, Y, Xt, m35, m56)
-
-    # 打印关键点坐标信息
-    # ParamCalculate.PrintOut_CalculateKeyPt(Index, Xt, Yt, k23, k56)
+    Xt, Yt, curve_param, Index, K = cooling_curve_calc.calc_import_pts(X, Y, curve_param, Xt)
 
     # 计算横坐标间距和基准百分比
-    intervalx = common.GetInterval(Xt[7], Xt[6], Index[7], Index[6])
+    intervalx = common.GetInterval(Xt[0], Xt[1], Index[0], Index[1])
 
-    # 计算l67
-    l67_pts = MakePts.calc_l67_pts(Index, X, Y)
+    # 计算l01
+    l01_pts = cooling_curve_calc.calc_l01_pts(Index, X, Y)
 
-    # 计算l56
-    # 基于已有数据来造数据，已有数据曲线上，只有l12和l56(可能没有，或者只有一部分数据曲线）和l67
-    # 所以基于已有数据,l12的t2的index2，和l56(部分曲线数据）的t5的index5相等
-    l_5_to_5half_pts, l_5half_to_6_pts, l56_bezier_pts = MakePts.calc_l56_pts(Index, X, Y, Xt, k56, intervalx)
+    # 计算l12
+    l12_pts = cooling_curve_calc.calc_l12_pts(curve_param, Xt, Yt, K, intervalx)
 
-    # 计算l35贝塞尔曲线上的数据
-    pt3 = [Xt[3], Yt[3]]
-    pt5 = l_5_to_5half_pts[0]
-    l35_pts = MakePts.calc_l35_pts(pt3, pt5, k23, intervalx)
+    # 计算l24
+    l24_pts = cooling_curve_calc.calc_l24_pts(l12_pts, Xt, Yt, K)
 
-    # 计算l23曲线上的数据
-    l23_pts = MakePts.calc_l23_pts(Xt, Yt, l35_pts[0], k23, intervalx)
+    # 计算l45
+    l45_pts = cooling_curve_calc.calc_l45_pts(Xt, Yt, curve_param, K, intervalx)
 
-    # 计算l12曲线上的数据
-    l12_ctl_pt3 = l23_pts[0]
-    l1_1half_pts, l12_bezier_pts = MakePts.calc_l12_pts(Xt, Yt, X, Y, Index, k23, l12_ctl_pt3, intervalx)
 
-    # 所有曲线
-    l_pts = []
-    l_pts.extend(l1_1half_pts)
-    l_pts.extend(l12_bezier_pts)
-    l_pts.extend(l23_pts)
-    l_pts.extend(l35_pts)
-    l_pts.extend(l_5_to_5half_pts)
-    l_pts.extend(l56_bezier_pts)
-    l_pts.extend(l_5half_to_6_pts)
-    l_pts.extend(l67_pts)
+    l_pts = cooling_curve_calc.merge(l01_pts, l12_pts, l24_pts, l45_pts)
 
-    return l_pts, Xt, Yt
+    new_X = [pt[0] for pt in l_pts]
+    new_Y = [pt[1] for pt in l_pts]
+    curve = [new_X, new_Y]
+
+    return curve
 
 
 def read_pt(read_excel: ReadExcel, x_cell_coord: list, y_cell_coord: list):
@@ -223,14 +208,14 @@ def save_label_data(write_excel: WriteExcel, label_cell_coord, label_name):
 
 
 def save_curve_data(write_excel: WriteExcel, startx_cell_coord, starty_cell_coord, curve: list):
-    startx_cell_coordx = startx_cell_coord[0]
-    x_cell_coordy = startx_cell_coord[1]
-    y_cell_coordy = starty_cell_coord[1]
+    startx_cell_coordx = startx_cell_coord[0] + 1
+    x_cell_coordy = startx_cell_coord[1] + 1
+    y_cell_coordy = starty_cell_coord[1] + 1
 
-    pt_count = len(curve)
+    pt_count = len(curve[0])
     for pt_index in range(pt_count):
-        pt_x = curve[pt_index][0]
-        pt_y = curve[pt_index][1]
+        pt_x = curve[0][pt_index]
+        pt_y = curve[1][pt_index]
 
         cell_coordx = pt_index + startx_cell_coordx
         write_excel.set_cell_value(cell_coordx, x_cell_coordy, pt_x)
@@ -250,8 +235,6 @@ def save_data(filepath, label_cell_coords, label_names, startx_cell_coords, star
                         starty_cell_coord=starty_cell_coords[i], curve=curves[i])
 
     write_excel.save()
-
-    pass
 
 
 def plot_curves(curves, colors, label_names):
@@ -284,14 +267,12 @@ def main_process():
 
     colors = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#777777"]
 
-    plot_curves(curves, colors, label_names)
+    # plot_curves(curves, colors, label_names)
 
     # 获取曲线的参数配置
     curve_params, Xts = get_curve_param_config()
 
     new_curves = []
-
-    return
 
     # 遍历并处理5条曲线
     curve_count = len(curves)
@@ -301,18 +282,18 @@ def main_process():
         curve_param = curve_params[i]
         Xt = Xts[i]
 
-        new_curve, Xt, Yt = curve_process(X, Y, curve_param, Xt)
+        new_curve = curve_process(X, Y, curve_param, Xt)
 
         new_curves.append(new_curve)
-
-    save_filepath = "new_" + filepath
-    save_data(save_filepath, label_cell_coords, label_names, startx_cell_coords, starty_cell_coords, new_curves)
 
     # 绘制并显示5条曲线
     colors = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#777777"]
     plot_curves(new_curves, colors, label_names)
 
+    save_filepath = "new_" + filepath
+    save_data(save_filepath, label_cell_coords, label_names, startx_cell_coords, starty_cell_coords, new_curves)
+
 
 if __name__ == '__main__':
-    print("2_heating_curve_task")
+    print("2_cooling_curve_task")
     main_process()
