@@ -102,7 +102,7 @@ def calc_l24_pts(l12_pts: list, Xt: list, Yt: list, K: list):
 
     # 控制点
     ctrl_pt1 = [start_pt[0] + dx * scale, 0]
-    ctrl_pt2 = [end_pt[0] - dx * scale, 0]
+    ctrl_pt2 = [start_pt[0] + dx * scale, 0]
 
     # ctrl_pt1Y = k12 * (ctrl_pt1X - start_pt[0]) + start_pt[1]
     ctrl_pt1[1] = K[1] * (ctrl_pt1[0] - start_pt[0]) + start_pt[1]
