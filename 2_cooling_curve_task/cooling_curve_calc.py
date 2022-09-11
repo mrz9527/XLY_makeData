@@ -98,11 +98,11 @@ def calc_l24_pts(l12_pts: list, Xt: list, Yt: list, K: list):
     end_pt = [Xt[4], Yt[4]]
 
     dx = end_pt[0] - start_pt[0]
-    scale = 0.3
+    scale = 0.7
 
     # 控制点
     ctrl_pt1 = [start_pt[0] + dx * scale, 0]
-    ctrl_pt2 = [start_pt[0] + dx * scale, 0]
+    ctrl_pt2 = [end_pt[0] - dx * scale, 0]
 
     # ctrl_pt1Y = k12 * (ctrl_pt1X - start_pt[0]) + start_pt[1]
     ctrl_pt1[1] = K[1] * (ctrl_pt1[0] - start_pt[0]) + start_pt[1]
@@ -111,15 +111,17 @@ def calc_l24_pts(l12_pts: list, Xt: list, Yt: list, K: list):
     ctrl_pt2[1] = K[4] * (ctrl_pt2[0] - end_pt[0]) + end_pt[1]
 
     # 更新起点和终点
-    new_startx = start_pt[0] - scale * dx
-    new_starty = K[1] * (new_startx - start_pt[0]) + start_pt[1]
-    new_start_pt = [new_startx, new_starty]
+    # new_startx = start_pt[0] - scale * dx
+    # new_starty = K[1] * (new_startx - start_pt[0]) + start_pt[1]
+    # new_start_pt = [new_startx, new_starty]
+    #
+    # new_endx = end_pt[0] + dx * scale
+    # new_endy = K[4] * (new_endx - end_pt[0]) + end_pt[1]
+    # new_end_pt = [new_endx, new_endy]
+    #
+    # bezier_pts = [new_start_pt, ctrl_pt1, ctrl_pt2, new_end_pt]
 
-    new_endx = end_pt[0] + dx * scale
-    new_endy = K[4] * (new_endx - end_pt[0]) + end_pt[1]
-    new_end_pt = [new_endx, new_endy]
-
-    bezier_pts = [new_start_pt, ctrl_pt1, ctrl_pt2, new_end_pt]
+    bezier_pts = [start_pt, ctrl_pt1, ctrl_pt2, end_pt]
 
     interval = (l12_pts[-1][0] - l12_pts[0][0]) / len(l12_pts)
     scale = interval / (bezier_pts[-1][0] - bezier_pts[0][0]) / 2
