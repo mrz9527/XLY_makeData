@@ -133,6 +133,63 @@ def calc_l24_pts(l12_pts: list, Xt: list, Yt: list, K: list):
     return l24_pts
 
 
+def calc_l24_pts_ext(l12_pts: list, Xt: list, Yt: list, K: list, l24_param: list):
+    l24_scale1, l24_scale2, l24_ctlPt = l24_param
+
+    Yt[4] = K[2] * (Xt[4] - Xt[2]) + Yt[2]
+    p0 = l12_pts[-1]
+    p5 = [Xt[4], Yt[4]]
+
+    dx = p5[0] - p0[0]
+    dy = p5[1] - p0[1]
+
+    # p1
+    p1 = [p0[0] + dx * l24_scale1, 0]
+    p1[1] = K[1] * (p1[0] - p0[0]) + p0[1]
+
+    # p2
+    # L24_ctlPt[i][0]为高度(p1.y - p4.y)百分比。p2.y = p1.y - (p1.y - p4.y) * L24_ctlPt[i][0]
+    # L24_ctlPt[i][1]为(p1.y - p2.y)的百分比。 p2.x = p1.x + (p1.y - p2.y) * L24_ctlPt[i][1]
+    p2 = [0, 0]
+    p2[1] = p1[1] + dy * l24_ctlPt[0]
+    p2[0] = p1[0] + (p2[1] - p1[1]) * l24_ctlPt[1]
+
+    # bezier1
+    bezier1_pts = [p0, p1, p2]
+
+    # p3
+    p3 = [0, 0]
+    p3[0] = p2[0] + (p2[0] - p1[0]) * 1.5
+    p3[1] = p2[1] + (p2[1] - p1[1]) * 1.5
+
+    # p4
+    p4 = [p5[0] - dx * l24_scale2, 0]
+    p4[1] = K[4] * (p4[0] - p5[0]) + p5[1]
+
+    # bezier2
+    bezier2_pts = [p2, p3, p4, p5]
+
+    interval = (l12_pts[-1][0] - l12_pts[0][0]) / len(l12_pts)
+
+    scale1 = interval / (bezier1_pts[-1][0] - bezier1_pts[0][0]) / 2
+    scale2 = interval / (bezier2_pts[-1][0] - bezier2_pts[0][0]) / 2
+
+    T1 = Bezier.get_bezier_T_by_scale(scale1)
+    T2 = Bezier.get_bezier_T_by_scale(scale2)
+
+    bezier1 = Bezier(bezier1_pts)
+    l24_pts_1 = bezier1.get_bezier_pts(T1)
+
+    bezier2 = Bezier(bezier2_pts)
+    l24_pts_2 = bezier2.get_bezier_pts(T2)
+
+    l24_pts = []
+    l24_pts.extend(l24_pts_1)
+    l24_pts.extend(l24_pts_2)
+
+    return l24_pts
+
+
 def calc_l45_pts(Xt, Yt, curve_param, K, intervalx):
     l45_pts = []
 

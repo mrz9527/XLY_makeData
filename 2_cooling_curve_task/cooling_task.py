@@ -54,14 +54,22 @@ def get_curve_param_config():  # 预配置数据信息
     Xt5 = [-50.0, -50.0, -50.0, -50.0, -50.0]
     M12 = [1.0, 1.0, 1.0, 1.0, 1.0]
     M45 = [1.0, 1.0, 1.0, 10.0, 1.0]
-    M24 = [-150.0, 150.0, 80.0, -80.0, -50.0]
-
+    M24 = [-150.0, 150.0, 80.0, -60.0, -50.0]
 
     curve_num = len(Xt0)
 
     Xt1 = [Xt0[i] - Xdt0[i] for i in range(curve_num)]
     Xt2 = [Xt3[i] + Xdt32[i] for i in range(curve_num)]
     Xt4 = [Xt3[i] - Xdt32[i] for i in range(curve_num)]
+
+    # for l24 参数，l24用两段bezier曲线拼接
+    # bezier1: p0, p1, p2
+    # bezier2: p2, p3, p4, p5
+    L24_scale1 = [0.2, 0.2, 0.2, 0.2, 0.2]  # p1.x = p0.x + (p3.x - p0.x) * L24_scale1
+    L24_scale2 = [0.5, 0.5, 0.5, 0.5, 0.5]  # p2.x = p3.x - (p3.x - p0.x) * L24_scale2
+    # L24_ctlPt[i][0]为高度(p1.y - p4.y)百分比。p2.y = p1.y - (p1.y - p4.y) * L24_ctlPt[i][0]
+    # L24_ctlPt[i][1]为(p1.y - p2.y)的百分比。 p2.x = p1.x + (p1.y - p2.y) * L24_ctlPt[i][1]
+    L24_ctlPt = [[0.2, 0.1], [0.2, 0.1], [0.2, 0.1], [0.2, 0.3], [0.2, 0.1]]
 
     curve_params = []
     Xts = []
@@ -102,10 +110,18 @@ def get_curve_param_config():  # 预配置数据信息
         curve_params.append(curve_param)
         Xts.append(Xt)
 
-    return curve_params, Xts
+    L24_params = []
+    for i in range(curve_num):
+        l24_scale1 = L24_scale1[i]
+        l24_scale2 = L24_scale2[i]
+        l24_ctlPt = L24_ctlPt[i]
+        l24_param = [l24_scale1, l24_scale2, l24_ctlPt]
+        L24_params.append(l24_param)
+
+    return curve_params, Xts, L24_params
 
 
-def curve_process(X, Y, curve_param, Xt):
+def curve_process(X, Y, curve_param, Xt, l24_param):
     xdt0, xdt32, xdt34, m12, m24, m45 = curve_param
     xt0, xt1, xt2, xt3, xt4, xt5 = Xt
 
@@ -122,11 +138,11 @@ def curve_process(X, Y, curve_param, Xt):
     l12_pts = cooling_curve_calc.calc_l12_pts(curve_param, Xt, Yt, K, intervalx)
 
     # 计算l24
-    l24_pts = cooling_curve_calc.calc_l24_pts(l12_pts, Xt, Yt, K)
+    # l24_pts = cooling_curve_calc.calc_l24_pts(l12_pts, Xt, Yt, K)
+    l24_pts = cooling_curve_calc.calc_l24_pts_ext(l12_pts, Xt, Yt, K, l24_param)
 
     # 计算l45
     l45_pts = cooling_curve_calc.calc_l45_pts(Xt, Yt, curve_param, K, intervalx)
-
 
     l_pts = cooling_curve_calc.merge(l01_pts, l12_pts, l24_pts, l45_pts)
 
@@ -270,7 +286,7 @@ def main_process():
     # plot_curves(curves, colors, label_names)
 
     # 获取曲线的参数配置
-    curve_params, Xts = get_curve_param_config()
+    curve_params, Xts, L24_params = get_curve_param_config()
 
     new_curves = []
 
@@ -281,8 +297,9 @@ def main_process():
         Y = curves[i][1]
         curve_param = curve_params[i]
         Xt = Xts[i]
+        l24_param = L24_params[i]
 
-        new_curve = curve_process(X, Y, curve_param, Xt)
+        new_curve = curve_process(X, Y, curve_param, Xt, l24_param)
 
         new_curves.append(new_curve)
 
