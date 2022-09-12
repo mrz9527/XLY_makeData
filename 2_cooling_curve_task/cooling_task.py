@@ -50,11 +50,11 @@ def get_curve_param_config():  # 预配置数据信息
     Xdt0 = [3.0, 3.0, 3.0, 3.0, 3.0]
     Xt3 = [-8.6, -32.3, -15.6, -15.4, -6.3]
     Xdt32 = [9.0, 7.0, 7.0, 7.0, 7.0]
-    Xdt34 = [29.0, 7.0, 7.0, 7.0, 7.0]
+    Xdt34 = [29.0, 7.0, 7.0, 29.0, 7.0]
     Xt5 = [-50.0, -50.0, -50.0, -50.0, -50.0]
     M12 = [1.0, 1.0, 1.0, 1.0, 1.0]
     M45 = [1.0, 1.0, 1.0, 10.0, 1.0]
-    M24 = [-100.0, 150.0, 170.0, -60.0, -40.0]
+    M24 = [-100.0, 150.0, 170.0, -40.0, -40.0]
 
     curve_num = len(Xt0)
 
@@ -92,7 +92,7 @@ def get_curve_param_config():  # 预配置数据信息
 
         Xt1 = [Xt0[i] - Xdt0[i] for i in range(curve_num)]
         Xt2 = [Xt3[i] + Xdt32[i] for i in range(curve_num)]
-        Xt4 = [Xt3[i] - Xdt32[i] for i in range(curve_num)]
+        Xt4 = [Xt3[i] - Xdt34[i] for i in range(curve_num)]
 
         # 检测xt2是否合理
         if xt2 >= xt1:
