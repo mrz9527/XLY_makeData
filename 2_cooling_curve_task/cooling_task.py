@@ -65,11 +65,11 @@ def get_curve_param_config():  # 预配置数据信息
     # for l24 参数，l24用两段bezier曲线拼接
     # bezier1: p0, p1, p2
     # bezier2: p2, p3, p4, p5
-    L24_scale1 = [0.3, 0.3, 0.2, 0.2, 0.2]  # p1.x = p0.x + (p3.x - p0.x) * L24_scale1
+    L24_scale1 = [0.3, 0.2, 0.2, 0.2, 0.2]  # p1.x = p0.x + (p3.x - p0.x) * L24_scale1
     L24_scale2 = [0.1, 0.5, 0.5, 0.5, 0.5]  # p2.x = p3.x - (p3.x - p0.x) * L24_scale2
     # L24_ctlPt[i][0]为高度(p1.y - p4.y)百分比。p2.y = p1.y - (p1.y - p4.y) * L24_ctlPt[i][0]
     # L24_ctlPt[i][1]为(p1.y - p2.y)的百分比。 p2.x = p1.x + (p1.y - p2.y) * L24_ctlPt[i][1]
-    L24_ctlPt = [[0.2, 0.5], [0.25, 1], [0.2, 3], [0.25, 3], [0.2, 3]]
+    L24_ctlPt = [[0.2, 0.5], [0.25, 3], [0.2, 3], [0.25, 3], [0.2, 3]]
 
     curve_params = []
     Xts = []
